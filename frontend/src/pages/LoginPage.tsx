@@ -1,5 +1,5 @@
 /**
- * Login page — matches the wireframe centered auth card.
+ * Login page — uses shadcn/ui Card, Button, Input components.
  *
  * Shows a username/password form (placeholder for GitHub OAuth).
  * After successful login, shows a "Connect Repository" panel.
@@ -11,6 +11,16 @@ import { useNavigate } from "react-router-dom";
 import { Zap, LogIn, Loader2, CheckCircle, AlertCircle, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import * as api from "@/api/client";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export function LoginPage() {
   const { isAuthenticated, login, isLoading, error } = useAuth();
@@ -84,76 +94,76 @@ export function LoginPage() {
           </div>
 
           {/* Login card */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-lg shadow-black/20">
-            <h2 className="mb-1 text-center text-lg font-semibold text-foreground">
-              Sign in to continue
-            </h2>
-            <p className="mb-6 text-center text-sm text-muted-foreground">
-              Enter your credentials to access the dashboard.
-            </p>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="username"
-                  className="mb-1 block text-sm font-medium text-foreground"
-                >
-                  Username
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  placeholder="admin"
-                  className="w-full rounded-lg border border-input bg-secondary px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="mb-1 block text-sm font-medium text-foreground"
-                >
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="********"
-                  className="w-full rounded-lg border border-input bg-secondary px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              {error && (
-                <div className="flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  {error}
+          <Card className="shadow-lg shadow-black/20">
+            <CardHeader className="text-center">
+              <CardTitle>Sign in to continue</CardTitle>
+              <CardDescription>
+                Enter your credentials to access the dashboard.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="username"
+                    className="mb-1.5 block text-sm font-medium text-foreground"
+                  >
+                    Username
+                  </label>
+                  <Input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    placeholder="admin"
+                  />
                 </div>
-              )}
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <LogIn className="h-4 w-4" />
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="mb-1.5 block text-sm font-medium text-foreground"
+                  >
+                    Password
+                  </label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="********"
+                  />
+                </div>
+
+                {error && (
+                  <div className="flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    {error}
+                  </div>
                 )}
-                {isLoading ? "Signing in..." : "Sign In"}
-              </button>
-            </form>
 
-            <p className="mt-4 text-center text-xs text-muted-foreground">
-              GitHub OAuth coming soon. Use admin / admin123 for now.
-            </p>
-          </div>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <LogIn className="h-4 w-4" />
+                  )}
+                  {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
+
+              <p className="mt-4 text-center text-xs text-muted-foreground">
+                GitHub OAuth coming soon. Use admin / admin123 for now.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -175,56 +185,58 @@ export function LoginPage() {
         </div>
 
         {/* Connect repo card */}
-        <div className="rounded-xl border border-border bg-card p-6 shadow-lg shadow-black/20">
-          <h2 className="mb-4 text-sm font-semibold text-foreground">
-            Connect a Repository
-          </h2>
+        <Card className="shadow-lg shadow-black/20">
+          <CardHeader>
+            <CardTitle className="text-sm">Connect a Repository</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleConnectRepo} className="space-y-3">
+              <Input
+                type="url"
+                value={repoUrl}
+                onChange={(e) => setRepoUrl(e.target.value)}
+                placeholder="https://github.com/org/repo"
+              />
 
-          <form onSubmit={handleConnectRepo} className="space-y-3">
-            <input
-              type="url"
-              value={repoUrl}
-              onChange={(e) => setRepoUrl(e.target.value)}
-              placeholder="https://github.com/org/repo"
-              className="w-full rounded-lg border border-input bg-secondary px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-
-            {repoError && (
-              <div className="flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                {repoError}
-              </div>
-            )}
-
-            {repoSuccess && (
-              <div className="flex items-center gap-2 rounded-lg bg-status-accepted/10 px-3 py-2 text-sm text-status-accepted">
-                <CheckCircle className="h-4 w-4 shrink-0" />
-                {repoSuccess}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={repoLoading || !repoUrl.trim()}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent disabled:opacity-50"
-            >
-              {repoLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4" />
+              {repoError && (
+                <div className="flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  {repoError}
+                </div>
               )}
-              Connect Repository
-            </button>
-          </form>
-        </div>
+
+              {repoSuccess && (
+                <div className="flex items-center gap-2 rounded-lg bg-status-accepted/10 px-3 py-2 text-sm text-status-accepted">
+                  <CheckCircle className="h-4 w-4 shrink-0" />
+                  {repoSuccess}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                variant="outline"
+                disabled={repoLoading || !repoUrl.trim()}
+                className="w-full"
+              >
+                {repoLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                Connect Repository
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
 
         {/* Go to dashboard */}
-        <button
+        <Button
           onClick={handleGoToDashboard}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          className="w-full"
+          size="lg"
         >
           Go to Dashboard
-        </button>
+        </Button>
       </div>
     </div>
   );

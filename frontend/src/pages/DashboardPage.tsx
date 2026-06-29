@@ -1,5 +1,5 @@
 /**
- * Dashboard page — matches the wireframe layout.
+ * Dashboard page — uses shadcn/ui Badge, Table, Button, Slider components.
  *
  * Left column: connected repos list (GET /repos)
  * Right column: reviews table (GET /reviews) with filters + pagination
@@ -21,6 +21,18 @@ import * as api from "@/api/client";
 import type { ReviewFilters } from "@/api/client";
 import { cn } from "@/lib/utils";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 const PAGE_SIZE = 10;
 
 // Status filter options
@@ -31,7 +43,7 @@ const STATUS_FILTERS = [
   { value: "error", label: "Failed" },
 ] as const;
 
-// Decision → badge style map
+// Decision → badge variant + label map
 function getDecisionBadge(decision: string) {
   switch (decision) {
     case "accepted":
@@ -175,9 +187,9 @@ export function DashboardPage() {
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Connected Repos
           </h2>
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+          <Badge variant="secondary" className="text-[10px]">
             {repos.length}
-          </span>
+          </Badge>
         </div>
 
         <div className="space-y-0.5 p-2">
@@ -266,34 +278,30 @@ export function DashboardPage() {
               Status:
             </span>
             {STATUS_FILTERS.map((sf) => (
-              <button
+              <Button
                 key={sf.value}
+                variant={statusFilter === sf.value ? "default" : "secondary"}
+                size="xs"
+                className="rounded-full"
                 onClick={() => setStatusFilter(sf.value)}
-                className={cn(
-                  "rounded-full px-3 py-1 text-xs font-medium transition-colors",
-                  statusFilter === sf.value
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-muted-foreground hover:text-foreground"
-                )}
               >
                 {sf.label}
-              </button>
+              </Button>
             ))}
           </div>
 
           {/* Confidence slider */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="text-xs font-medium text-muted-foreground">
               Min Confidence:
             </span>
-            <input
-              type="range"
+            <Slider
+              value={[minConfidence]}
+              onValueChange={(v) => setMinConfidence(v[0])}
               min={0}
               max={100}
               step={5}
-              value={minConfidence}
-              onChange={(e) => setMinConfidence(Number(e.target.value))}
-              className="h-1.5 w-28 cursor-pointer appearance-none rounded-full bg-secondary accent-primary"
+              className="w-28"
             />
             <span className="w-8 text-right text-xs font-mono text-primary">
               {minConfidence}%
@@ -312,28 +320,28 @@ export function DashboardPage() {
               No reviews found matching your filters.
             </div>
           ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th className="pb-3 pr-4">Pull Request</th>
-                  <th className="pb-3 pr-4">Status</th>
-                  <th className="pb-3 pr-4">Confidence</th>
-                  <th className="pb-3 pr-4">Findings</th>
-                  <th className="pb-3 pr-4">Tests</th>
-                  <th className="pb-3">Time</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Pull Request</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Confidence</TableHead>
+                  <TableHead>Findings</TableHead>
+                  <TableHead>Tests</TableHead>
+                  <TableHead>Time</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {reviews.map((review) => {
                   const badge = getDecisionBadge(review.decision);
                   return (
-                    <tr
+                    <TableRow
                       key={review.id}
                       onClick={() => navigate(`/reviews/${review.id}`)}
-                      className="cursor-pointer transition-colors hover:bg-secondary/50"
+                      className="cursor-pointer"
                     >
                       {/* PR info */}
-                      <td className="py-3.5 pr-4">
+                      <TableCell>
                         <p className="text-sm font-medium text-foreground">
                           {review.pr_title}
                         </p>
@@ -342,22 +350,23 @@ export function DashboardPage() {
                           {" · "}
                           {repoShortName(review.repo_name)}
                         </p>
-                      </td>
+                      </TableCell>
 
                       {/* Status badge */}
-                      <td className="py-3.5 pr-4">
-                        <span
+                      <TableCell>
+                        <Badge
+                          variant="outline"
                           className={cn(
-                            "inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold tracking-wider",
+                            "text-[10px] font-bold tracking-wider",
                             badge.className
                           )}
                         >
                           {badge.label}
-                        </span>
-                      </td>
+                        </Badge>
+                      </TableCell>
 
                       {/* Confidence */}
-                      <td className="py-3.5 pr-4">
+                      <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="h-1.5 w-16 overflow-hidden rounded-full bg-secondary">
                             <div
@@ -378,17 +387,17 @@ export function DashboardPage() {
                             {Math.round(review.confidence_score * 100)}%
                           </span>
                         </div>
-                      </td>
+                      </TableCell>
 
                       {/* Findings */}
-                      <td className="py-3.5 pr-4">
+                      <TableCell>
                         <span className="text-sm text-muted-foreground">
                           {review.findings_count}
                         </span>
-                      </td>
+                      </TableCell>
 
                       {/* Tests */}
-                      <td className="py-3.5 pr-4">
+                      <TableCell>
                         <span
                           className={cn(
                             "text-sm font-mono",
@@ -403,17 +412,17 @@ export function DashboardPage() {
                             ? `${review.tests_passed}/${review.tests_total}`
                             : "—"}
                         </span>
-                      </td>
+                      </TableCell>
 
                       {/* Time */}
-                      <td className="py-3.5 text-xs text-muted-foreground">
+                      <TableCell className="text-xs text-muted-foreground">
                         {timeAgo(review.created_at)}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
 
           {/* Pagination */}
@@ -424,38 +433,36 @@ export function DashboardPage() {
                 {Math.min(page * PAGE_SIZE, totalReviews)} of {totalReviews}
               </p>
               <div className="flex items-center gap-1">
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-30"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                </button>
+                </Button>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                   (pageNum) => (
-                    <button
+                    <Button
                       key={pageNum}
+                      variant={pageNum === page ? "default" : "ghost"}
+                      size="icon-sm"
                       onClick={() => setPage(pageNum)}
-                      className={cn(
-                        "h-7 w-7 rounded-md text-xs font-medium transition-colors",
-                        pageNum === page
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                      )}
                     >
                       {pageNum}
-                    </button>
+                    </Button>
                   )
                 )}
 
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-30"
                 >
                   <ChevronRight className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
           )}
