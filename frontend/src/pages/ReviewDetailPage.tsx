@@ -1,10 +1,11 @@
 /**
- * PR Review Detail — Stage 6a: Header + three-column layout shell.
+ * PR Review Detail — Stage 6a header + 6b diff viewer.
  *
  * Fetches real review data from GET /reviews/{id}.
  * Header: PR title, repo/branch, status badge, confidence mini-meter,
  *         and Re-run Review button (wired to POST /reviews/{id}/rerun).
- * Body: three placeholder Card columns for Stages 6b–6d.
+ * Left column: DiffViewer showing proposed_fix.diff_text.
+ * Center/Right columns: placeholders for Stages 6c–6d.
  */
 
 import { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ import {
 import type { ReviewDetailResponse } from "@/api/types";
 import * as api from "@/api/client";
 import { cn } from "@/lib/utils";
+import { DiffViewer } from "@/components/DiffViewer";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -299,19 +301,8 @@ export function ReviewDetailPage() {
       {/* ===== Three-column body ===== */}
       <div className="flex-1 overflow-auto p-6">
         <div className="grid grid-cols-3 gap-4" style={{ minHeight: "400px" }}>
-          {/* Column 1: Diff Viewer */}
-          <Card className="flex flex-col">
-            <CardHeader>
-              <CardTitle className="text-sm">Diff Viewer</CardTitle>
-              <CardDescription>Stage 6b</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-1 items-center justify-center">
-              <p className="text-center text-xs text-muted-foreground">
-                Side-by-side diff view of changed files with inline annotations
-                will be built in Stage 6b.
-              </p>
-            </CardContent>
-          </Card>
+          {/* Column 1: Diff Viewer (Stage 6b) */}
+          <DiffViewer proposedFixes={review.proposed_fixes} />
 
           {/* Column 2: Reasoning Trace */}
           <Card className="flex flex-col">
